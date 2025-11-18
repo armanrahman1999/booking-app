@@ -1,13 +1,13 @@
-import { gql } from '@apollo/client';
+// import { graphqlClient } from '@/lib/graphql-client';
 
-export const CREATE_RESERVATION = gql`
-  mutation CreateReservation($input: CreateReservationInput!) {
-    createReservation(input: $input) {
-      id
-      unit
-      table
-      user
-      occupiedTime
-    }
-  }
-`;
+// export const CREATE_RESERVATION = `
+//   mutation CreateReservation($input: CreateReservationInput!) {
+//     createReservation(input: $input) {
+//       id
+//       unit
+//       table
+//       user
+//       occupiedTime
+//     }
+//   }
+// `;

@@ -1,3 +1,4 @@
+import CreateTable from '../component/create-table';
 import { UnitSelector } from '../component/unit-selector';
 
 export const DeskBookingPage = () => {
@@ -7,6 +8,7 @@ export const DeskBookingPage = () => {
         <h1 className="text-lg font-semibold">Desk Booking</h1>
         <UnitSelector />
       </div>
+      <CreateTable />
     </div>
   );
 };
