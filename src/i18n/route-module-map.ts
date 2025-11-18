@@ -9,19 +9,5 @@
  *                                followed by route-specific module names
  */
 export const routeModuleMap: Record<string, string[]> = {
-  '/dashboard': ['common', 'dashboard'],
-  '/finance': ['common', 'finance'],
-  '/identity-management': ['common', 'iam'],
-  '/inventory': ['common', 'inventory'],
-  '/mail': ['common', 'mail'],
-  '/calendar': ['common', 'calendar'],
-  '/activity-log': ['common', 'timeline'],
-  '/timeline': ['common', 'timeline'],
-  '/task-manager': ['common', 'task-manager'],
-  '/chat': ['common', 'chat'],
-  '/invoices': ['common', 'invoices'],
-  '/file-manager': ['common', 'file-manager'],
-  '/profile': ['common', 'profile', 'mfa'],
-  '/404': ['common', 'error'],
-  '/503': ['common', 'error'],
+  '/desk-booking': ['common', 'desk-booking'],
 };
