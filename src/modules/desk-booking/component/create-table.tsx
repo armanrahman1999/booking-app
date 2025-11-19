@@ -5,7 +5,13 @@ import { Button } from '@/components/ui-kit/button';
 import { v4 as uuidv4 } from 'uuid';
 import { INSERT_RESERVATION } from '../services/desk-booking';
 
-export const CreateTable = () => {
+interface CreateTableProps {
+  unit: string;
+  count: number;
+  onTableCreated: () => void; // Add this prop
+}
+
+export const CreateTable = ({ unit, count, onTableCreated }: CreateTableProps) => {
   const accessToken = useAuthStore((state) => state.accessToken);
   const BLOCKS_KEY = API_CONFIG.blocksKey;
 
@@ -13,7 +19,7 @@ export const CreateTable = () => {
 
   const handleCreateRow = async () => {
     try {
-      const tableName = 'table-1';
+      const tableName = `table-${count}`;
       const chairsCount = 8;
 
       // Generate tableId once
@@ -31,11 +37,11 @@ export const CreateTable = () => {
           insertReservation({
             variables: {
               input: {
-                Unit: 'blks',
+                Unit: unit,
                 Table: tableName,
                 chair: chairName,
-                tableId: tableId, // ⬅️ NEW
-                endTime: endTime, // ⬅️ NEW
+                tableId: tableId,
+                endTime: endTime,
                 userId: '',
               },
             },
@@ -50,7 +56,11 @@ export const CreateTable = () => {
       }
 
       const results = await Promise.all(insertionPromises);
-      console.error('results', results);
+
+      if (!results) console.error('Error creating reservations');
+
+      // Call the refetch function after successful creation
+      onTableCreated();
     } catch (err) {
       console.error('Error creating reservations:', err);
     }

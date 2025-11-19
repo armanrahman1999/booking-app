@@ -9,3 +9,10 @@ export const useCaptchaVerification = (code: string) => {
     refetchOnMount: 'always',
   });
 };
+export const useGetRole = () => {
+  return useQuery({
+    queryKey: ['user-role'],
+    queryFn: () => bookingService.getRole(),
+    refetchOnMount: 'always',
+  });
+};

@@ -14,10 +14,15 @@ const Units = [
   { value: 'inb', name: 'INB' },
   { value: 'consulting', name: 'Consulting' },
 ];
-export const UnitSelector = () => {
+
+interface UnitSelectorProps {
+  value: string;
+  onValueChange: (value: string) => void;
+}
+
+export const UnitSelector = ({ value, onValueChange }: UnitSelectorProps) => {
   return (
-    <Select>
-      {' '}
+    <Select value={value} onValueChange={onValueChange}>
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder="Select unit" />
       </SelectTrigger>

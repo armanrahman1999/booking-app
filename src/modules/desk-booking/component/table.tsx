@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui-kit/button';
-import { BookChair } from './book-chair';
 import { Trash } from 'lucide-react';
 import { useMutation } from '@apollo/client';
 import { useAuthStore } from '@/state/store/auth';
 import API_CONFIG from '@/config/api';
 import { DELETE_RESERVATION } from '../services/desk-booking';
 import { useGetAccount } from '@/modules/profile/hooks/use-account';
+
 export interface Reservation {
   ItemId: string;
   CreatedDate: string;
@@ -31,9 +31,11 @@ export interface Reservation {
 
 interface IReservationProps {
   data: Reservation[];
+  selectedChair: string | null;
+  onChairSelect: (chairId: string | null) => void;
 }
 
-export const RoomArea = ({ data }: IReservationProps) => {
+export const RoomArea = ({ data, selectedChair, onChairSelect }: IReservationProps) => {
   const tables = data.reduce(
     (acc, item) => {
       if (!acc[item.Table]) {
@@ -48,7 +50,13 @@ export const RoomArea = ({ data }: IReservationProps) => {
   return (
     <div className="space-y-8">
       {Object.entries(tables).map(([tableName, tableData]) => (
-        <Table key={tableName} tableName={tableName} data={tableData} />
+        <Table
+          key={tableName}
+          tableName={tableName}
+          data={tableData}
+          selectedChair={selectedChair}
+          onChairSelect={onChairSelect}
+        />
       ))}
     </div>
   );
@@ -57,9 +65,11 @@ export const RoomArea = ({ data }: IReservationProps) => {
 interface TableProps {
   tableName: string;
   data: Reservation[];
+  selectedChair: string | null;
+  onChairSelect: (chairId: string | null) => void;
 }
 
-const Table = ({ tableName, data }: TableProps) => {
+const Table = ({ tableName, data, selectedChair, onChairSelect }: TableProps) => {
   const accessToken = useAuthStore((state) => state.accessToken);
   const BLOCKS_KEY = API_CONFIG.blocksKey;
 
@@ -108,19 +118,26 @@ const Table = ({ tableName, data }: TableProps) => {
 
       <div className="flex flex-wrap gap-2">
         {data.map((item) => (
-          <Chair key={item.ItemId} reservation={item} />
+          <Chair
+            key={item.ItemId}
+            reservation={item}
+            isSelected={selectedChair === item.ItemId}
+            onSelect={onChairSelect}
+          />
         ))}
       </div>
     </div>
   );
 };
+
 interface ChairProps {
   reservation: Reservation;
+  isSelected: boolean;
+  onSelect: (chairId: string | null) => void;
 }
 
-const Chair = ({ reservation }: ChairProps) => {
+const Chair = ({ reservation, isSelected, onSelect }: ChairProps) => {
   const { chair, ItemId, userId } = reservation;
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [occupied, setOccupied] = useState(false);
   const { data: userData } = useGetAccount();
 
@@ -137,32 +154,40 @@ const Chair = ({ reservation }: ChairProps) => {
   };
 
   const getChairColor = () => {
-    return occupied ? 'bg-red-100' : 'bg-green-100';
+    if (isSelected) return 'bg-blue-200 border-blue-500 border-2';
+    if (occupied) return 'bg-red-100 border-red-300';
+    return 'bg-green-100 border-green-300';
+  };
+
+  const getChairTextColor = () => {
+    if (isSelected) return 'text-blue-800';
+    if (occupied) return 'text-red-800';
+    return 'text-green-800';
   };
 
   const handleChairClick = () => {
     if (!occupied) {
-      setIsDialogOpen(true);
+      if (isSelected) {
+        onSelect(null); // Deselect
+      } else {
+        onSelect(ItemId); // Select
+      }
     }
   };
+
   const chairState = !checkUser() && occupied ? 'Booked' : chair;
 
   return (
-    <>
-      <Button
-        onClick={handleChairClick}
-        className={`h-20 w-20 ${getChairColor()} text-high-emphasis border`}
-        disabled={occupied}
-      >
-        {chairState}
-      </Button>
-
-      <BookChair
-        itemId={ItemId}
-        isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        reservation={reservation}
-      />
-    </>
+    <Button
+      onClick={handleChairClick}
+      className={`h-20 w-20 ${getChairColor()} ${getChairTextColor()} font-medium border`}
+      disabled={occupied}
+      variant={isSelected ? 'default' : 'outline'}
+    >
+      <div className="flex flex-col items-center">
+        <span>{chairState}</span>
+        {isSelected && <span className="text-xs mt-1">Selected</span>}
+      </div>
+    </Button>
   );
 };
