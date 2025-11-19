@@ -16,7 +16,7 @@ export function useReservationCleanupAndUpdate() {
   const [fetchReservations] = useLazyQuery(GET_RESERVATIONS);
   const [updateReservation, { loading: isUpdating }] = useMutation(UPDATE_RESERVATION);
 
-  const cleanupAndUpdate = async (newReservationId: string) => {
+  const cleanupAndUpdate = async (newReservationId: string, name: string) => {
     try {
       // 🔥 STEP 1 — Fetch all reservations belonging to this user
       const filter = JSON.stringify({ userId });
@@ -64,6 +64,8 @@ export function useReservationCleanupAndUpdate() {
           input: {
             userId,
             endTime: getTargetUtcTime(),
+            Name: name,
+            startTime: new Date().toISOString(),
           },
         },
         context: {

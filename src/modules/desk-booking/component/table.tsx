@@ -1,11 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui-kit/button';
-import { Trash } from 'lucide-react';
-import { useMutation } from '@apollo/client';
-import { useAuthStore } from '@/state/store/auth';
-import API_CONFIG from '@/config/api';
-import { DELETE_RESERVATION } from '../services/desk-booking';
+// import { Trash } from 'lucide-react';
+// import { useMutation } from '@apollo/client';
+// import { useAuthStore } from '@/state/store/auth';
+// import API_CONFIG from '@/config/api';
+// import { DELETE_RESERVATION } from '../services/desk-booking';
 import { useGetAccount } from '@/modules/profile/hooks/use-account';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui-kit/tooltip';
 
 export interface Reservation {
   ItemId: string;
@@ -26,6 +32,8 @@ export interface Reservation {
   tableId: string;
   endTime: Date;
   userId: string;
+  name: string;
+  startTime: Date;
   __typename: string;
 }
 
@@ -70,53 +78,53 @@ interface TableProps {
 }
 
 const Table = ({ tableName, data, selectedChair, onChairSelect }: TableProps) => {
-  const accessToken = useAuthStore((state) => state.accessToken);
-  const BLOCKS_KEY = API_CONFIG.blocksKey;
+  // const accessToken = useAuthStore((state) => state.accessToken);
+  // const BLOCKS_KEY = API_CONFIG.blocksKey;
 
-  const [deleteReservation, { loading }] = useMutation(DELETE_RESERVATION);
+  // const [deleteReservation, { loading }] = useMutation(DELETE_RESERVATION);
 
-  const handleDelete = async () => {
-    if (data.length === 0) return;
+  // const handleDelete = async () => {
+  //   if (data.length === 0) return;
 
-    try {
-      // Create delete promises for each item using their unique properties
-      const deletePromises = data.map((item) => {
-        const filter = JSON.stringify({
-          _id: item.ItemId,
-        });
+  //   try {
+  //     // Create delete promises for each item using their unique properties
+  //     const deletePromises = data.map((item) => {
+  //       const filter = JSON.stringify({
+  //         _id: item.ItemId,
+  //       });
 
-        return deleteReservation({
-          variables: { filter },
-          context: {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              'x-blocks-key': BLOCKS_KEY,
-            },
-          },
-        });
-      });
+  //       return deleteReservation({
+  //         variables: { filter },
+  //         context: {
+  //           headers: {
+  //             Authorization: `Bearer ${accessToken}`,
+  //             'x-blocks-key': BLOCKS_KEY,
+  //           },
+  //         },
+  //       });
+  //     });
 
-      // Execute all deletions in parallel
-      const results = await Promise.all(deletePromises);
-      if (!results) console.error('Error deleting reservations');
-    } catch (error) {
-      console.error('Error deleting reservations:', error);
-    }
-  };
+  //     // Execute all deletions in parallel
+  //     const results = await Promise.all(deletePromises);
+  //     if (!results) console.error('Error deleting reservations');
+  //   } catch (error) {
+  //     console.error('Error deleting reservations:', error);
+  //   }
+  // };
 
   return (
     <div className="border rounded-lg p-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold mb-4">Table: {tableName}</h3>
-        <Trash
+        {/* <Trash
           className={`w-5 h-5 ${
             loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:text-red-600'
           }`}
           onClick={loading ? undefined : handleDelete}
-        />
+        /> */}
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {data.map((item) => (
           <Chair
             key={item.ItemId}
@@ -140,6 +148,8 @@ const Chair = ({ reservation, isSelected, onSelect }: ChairProps) => {
   const { chair, ItemId, userId } = reservation;
   const [occupied, setOccupied] = useState(false);
   const { data: userData } = useGetAccount();
+  const name = reservation.name;
+  const startTime = reservation.startTime;
 
   // FIX: Proper occupied logic
   useEffect(() => {
@@ -153,16 +163,21 @@ const Chair = ({ reservation, isSelected, onSelect }: ChairProps) => {
     return userId === userData?.itemId;
   };
 
+  const isBookedByMe = checkUser() && occupied;
+  const isBookedByOther = !checkUser() && occupied;
+
   const getChairColor = () => {
-    if (isSelected) return 'bg-blue-200 border-blue-500 border-2';
-    if (occupied) return 'bg-red-100 border-red-300';
-    return 'bg-green-100 border-green-300';
+    if (isSelected) return 'bg-blue-300 border-blue-500 border-2 ';
+    if (isBookedByOther) return 'bg-red-100 border-red-300';
+    if (isBookedByMe) return 'bg-green-200 border-green-400';
+    return 'bg-blue-100 border-blue-300'; // Available
   };
 
   const getChairTextColor = () => {
-    if (isSelected) return 'text-blue-800';
-    if (occupied) return 'text-red-800';
-    return 'text-green-800';
+    if (isSelected) return 'text-blue-900';
+    if (isBookedByOther) return 'text-red-800';
+    if (isBookedByMe) return 'text-green-800';
+    return 'text-blue-800';
   };
 
   const handleChairClick = () => {
@@ -175,19 +190,53 @@ const Chair = ({ reservation, isSelected, onSelect }: ChairProps) => {
     }
   };
 
-  const chairState = !checkUser() && occupied ? 'Booked' : chair;
+  const formatStartTime = (isoString: string) => {
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: 'Asia/Dhaka',
+    });
+  };
 
-  return (
+  const chairButton = (
     <Button
       onClick={handleChairClick}
-      className={`h-20 w-20 ${getChairColor()} ${getChairTextColor()} font-medium border`}
+      className={`h-20 w-full ${getChairColor()} ${getChairTextColor()} font-medium border hover:opacity-100 hover:scale-100`}
       disabled={occupied}
-      variant={isSelected ? 'default' : 'outline'}
+      variant="outline"
     >
       <div className="flex flex-col items-center">
-        <span>{chairState}</span>
+        <span>{chair}</span>
         {isSelected && <span className="text-xs mt-1">Selected</span>}
+        {isBookedByMe && <span className="text-xs mt-1">Your Seat</span>}
       </div>
     </Button>
   );
+
+  // Only wrap with tooltip if booked by someone else
+  if (isBookedByOther) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>{chairButton}</TooltipTrigger>
+          <TooltipContent>
+            <div className="text-sm">
+              <p className="font-semibold">{name}</p>
+              <p className="text-xs text-gray-500">
+                Booked: {formatStartTime(startTime.toISOString())}
+              </p>
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
+  return chairButton;
 };

@@ -10,12 +10,14 @@ interface BookChairButtonProps {
   selectedChair: string | null;
   onClearSelection: () => void;
   onBookingComplete?: () => void;
+  name: string;
 }
 
 export const BookChairButton = ({
   selectedChair,
   onClearSelection,
   onBookingComplete,
+  name,
 }: BookChairButtonProps) => {
   const [showCaptcha, setShowCaptcha] = useState(false);
   const { captcha, code, reset } = useCaptcha({
@@ -58,7 +60,7 @@ export const BookChairButton = ({
       processedCodeRef.current = code;
 
       try {
-        await cleanupAndUpdate(selectedChair);
+        await cleanupAndUpdate(selectedChair, name);
 
         if (onBookingComplete) {
           onBookingComplete();
@@ -83,6 +85,7 @@ export const BookChairButton = ({
     onBookingComplete,
     onClearSelection,
     reset,
+    name,
   ]);
 
   return (

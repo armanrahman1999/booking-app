@@ -43,6 +43,8 @@ export const CreateTable = ({ unit, count, onTableCreated }: CreateTableProps) =
                 tableId: tableId,
                 endTime: endTime,
                 userId: '',
+                Name: '',
+                startTime: new Date().toISOString(),
               },
             },
             context: {

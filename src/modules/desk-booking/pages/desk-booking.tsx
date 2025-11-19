@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client';
 import { UnitSelector } from '../component/unit-selector';
-import CreateTable from '../component/create-table';
+// import CreateTable from '../component/create-table';
 import { useAuthStore } from '@/state/store/auth';
 import API_CONFIG from '@/config/api';
 import { GET_RESERVATIONS } from '../services/desk-booking';
@@ -8,18 +8,19 @@ import { RoomArea } from '../component/table';
 import { useEffect, useState } from 'react';
 import { BookChairButton } from '../component/book-chair-button';
 import { getTargetUtcTime } from '../utils/getTime';
-// import { useGetRole } from '../hook/desk-booking';
-
-// Define the GraphQL query
+import { useGetAccount } from '@/modules/profile/hooks/use-account';
 
 export const DeskBookingPage = () => {
-  // const { data: roleData } = useGetRole();
-  // console.log(roleData, 'roleData');
-  const date = new Date(getTargetUtcTime());
+  const { data: userData } = useGetAccount();
+
+  const name = userData?.firstName + ' ' + userData?.lastName;
+  const time = getTargetUtcTime();
+  const date = new Date(time);
   const formatted = date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
+    timeZone: 'Asia/Dhaka', // ✅ Add this
   });
   const [unit, setUnit] = useState('blocks');
   const accessToken = useAuthStore((state) => state.accessToken);
@@ -47,7 +48,7 @@ export const DeskBookingPage = () => {
     refetch();
   }, [unit, refetch]);
 
-  const count = (data?.getReservations?.totalCount || 0) / 8 + 1;
+  // const count = (data?.getReservations?.totalCount || 0) / 8 + 1;
 
   return (
     <div className="flex flex-col w-full gap-5">
@@ -57,11 +58,12 @@ export const DeskBookingPage = () => {
       </div>
 
       <div className="flex gap-2">
-        <CreateTable unit={unit} count={count} onTableCreated={refetch} />
+        {/* <CreateTable unit={unit} count={count} onTableCreated={refetch} /> */}
         <BookChairButton
           selectedChair={selectedChair}
           onClearSelection={() => setSelectedChair(null)}
           onBookingComplete={refetch}
+          name={name}
         />
       </div>
       <div>

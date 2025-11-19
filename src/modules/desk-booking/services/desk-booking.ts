@@ -24,6 +24,8 @@ export const GET_RESERVATIONS = gql`
         tableId
         endTime
         userId
+        Name
+        startTime
       }
     }
   }
