@@ -1,53 +1,64 @@
-import { gql, useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client';
+import { useAuthStore } from '@/state/store/auth';
+import API_CONFIG from '@/config/api';
 import { Button } from '@/components/ui-kit/button';
-
-// 1. Define mutation using gql
-const CREATE_RESERVATION = gql`
-  mutation CreateReservation($input: CreateReservationInput!) {
-    createReservation(input: $input) {
-      id
-      unit
-      table
-      user
-      occupiedTime
-    }
-  }
-`;
+import { v4 as uuidv4 } from 'uuid';
+import { INSERT_RESERVATION } from '../services/desk-booking';
 
 export const CreateTable = () => {
-  // 2. Apollo useMutation hook
-  const [createReservation, { loading, error }] = useMutation(CREATE_RESERVATION);
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const BLOCKS_KEY = API_CONFIG.blocksKey;
 
-  // 3. Function that calls the mutation
+  const [insertReservation, { loading }] = useMutation(INSERT_RESERVATION);
+
   const handleCreateRow = async () => {
     try {
-      await createReservation({
-        variables: {
-          input: {
-            unit: 'blocks',
-            table: '',
-            user: '',
-            occupiedTime: '',
-            isOccupied: false,
-          },
-        },
-      });
+      const tableName = 'table-1';
+      const chairsCount = 8;
 
-      alert('Row created successfully!');
+      // Generate tableId once
+      const tableId = uuidv4();
+
+      // Fixed endTime for all entries
+      const endTime = new Date(0).toISOString(); // "1970-01-01T00:00:00.000Z"
+
+      const insertionPromises = [];
+
+      for (let i = 1; i <= chairsCount; i++) {
+        const chairName = `chair-${i}`;
+
+        insertionPromises.push(
+          insertReservation({
+            variables: {
+              input: {
+                Unit: 'blks',
+                Table: tableName,
+                chair: chairName,
+                tableId: tableId, // ⬅️ NEW
+                endTime: endTime, // ⬅️ NEW
+              },
+            },
+            context: {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'x-blocks-key': BLOCKS_KEY,
+              },
+            },
+          })
+        );
+      }
+
+      const results = await Promise.all(insertionPromises);
+      console.error('results', results);
     } catch (err) {
-      console.error('Error creating row:', err);
-      alert('Failed to create row');
+      console.error('Error creating reservations:', err);
     }
   };
 
   return (
-    <>
-      <Button onClick={handleCreateRow} disabled={loading}>
-        {loading ? 'Adding...' : 'Add Table'}
-      </Button>
-
-      {error && <p className="text-red-500 text-sm mt-2">{error.message}</p>}
-    </>
+    <Button onClick={handleCreateRow} disabled={loading}>
+      {loading ? 'Creating Table...' : 'Create Table with 8 Chairs'}
+    </Button>
   );
 };
 

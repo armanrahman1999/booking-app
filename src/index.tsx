@@ -8,7 +8,7 @@ import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
 initializeProjectKey();
 
 const client = new ApolloClient({
-  uri: 'https://your-graphql-endpoint.com/graphql', // replace with your GraphQL endpoint
+  uri: 'https://api.seliseblocks.com/data/v1/pbrroo/gateway', // replace with your GraphQL endpoint
   cache: new InMemoryCache(),
 });
 
