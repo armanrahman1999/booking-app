@@ -10,4 +10,5 @@
  */
 export const routeModuleMap: Record<string, string[]> = {
   '/desk-booking': ['common', 'desk-booking'],
+  '/profile': ['common', 'profile', 'mfa'],
 };

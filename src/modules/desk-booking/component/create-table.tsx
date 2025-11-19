@@ -36,6 +36,7 @@ export const CreateTable = () => {
                 chair: chairName,
                 tableId: tableId, // ⬅️ NEW
                 endTime: endTime, // ⬅️ NEW
+                userId: '',
               },
             },
             context: {

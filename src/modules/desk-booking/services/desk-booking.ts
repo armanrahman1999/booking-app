@@ -23,6 +23,7 @@ export const GET_RESERVATIONS = gql`
         chair
         tableId
         endTime
+        userId
       }
     }
   }

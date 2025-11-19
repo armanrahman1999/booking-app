@@ -13,8 +13,8 @@ export const DeskBookingPage = () => {
   const BLOCKS_KEY = API_CONFIG.blocksKey;
 
   // Prepare the filter for Unit = "Sample text"
-  const filter = JSON.stringify({ Unit: 'blocks' });
-  const sort = JSON.stringify({ chair: 1 }); // 1 for ascending, -1 for descending
+  const filter = JSON.stringify({ Unit: 'blks' });
+  const sort = JSON.stringify({ chair: 1 });
 
   // Use the query hook with headers
   const { data } = useQuery(GET_RESERVATIONS, {
@@ -31,8 +31,6 @@ export const DeskBookingPage = () => {
       },
     },
   });
-
-  // You can access the data here
 
   return (
     <div className="flex flex-col w-full gap-5">

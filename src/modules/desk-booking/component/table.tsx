@@ -6,6 +6,7 @@ import { useMutation } from '@apollo/client';
 import { useAuthStore } from '@/state/store/auth';
 import API_CONFIG from '@/config/api';
 import { DELETE_RESERVATION } from '../services/desk-booking';
+import { useGetAccount } from '@/modules/profile/hooks/use-account';
 export interface Reservation {
   ItemId: string;
   CreatedDate: string;
@@ -24,6 +25,7 @@ export interface Reservation {
   state: string;
   tableId: string;
   endTime: Date;
+  userId: string;
   __typename: string;
 }
 
@@ -117,9 +119,10 @@ interface ChairProps {
 }
 
 const Chair = ({ reservation }: ChairProps) => {
-  const { chair, ItemId } = reservation;
+  const { chair, ItemId, userId } = reservation;
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [occupied, setOccupied] = useState(false);
+  const { data: userData } = useGetAccount();
 
   // FIX: Proper occupied logic
   useEffect(() => {
@@ -128,6 +131,10 @@ const Chair = ({ reservation }: ChairProps) => {
       setOccupied(end > new Date());
     }
   }, [reservation.endTime]);
+
+  const checkUser = () => {
+    return userId === userData?.itemId;
+  };
 
   const getChairColor = () => {
     return occupied ? 'bg-red-100' : 'bg-green-100';
@@ -138,6 +145,7 @@ const Chair = ({ reservation }: ChairProps) => {
       setIsDialogOpen(true);
     }
   };
+  const chairState = !checkUser() && occupied ? 'Booked' : chair;
 
   return (
     <>
@@ -146,7 +154,7 @@ const Chair = ({ reservation }: ChairProps) => {
         className={`h-20 w-20 ${getChairColor()} text-high-emphasis border`}
         disabled={occupied}
       >
-        {chair}
+        {chairState}
       </Button>
 
       <BookChair

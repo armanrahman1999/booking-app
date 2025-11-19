@@ -11,6 +11,7 @@ import './i18n/i18n';
 import { AuthRoutes } from './routes/auth.route';
 import { useLanguageContext, LanguageProvider } from './i18n/language-context';
 import { DeskBookingPage } from './modules/desk-booking/pages/desk-booking';
+import { ProfilePage } from './modules/profile';
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ function AppContent() {
               <Route element={<MainLayout />}>
                 <Route path="/desk-booking" element={<DeskBookingPage />} />
               </Route>
+              <Route path="/profile" element={<ProfilePage />} />
 
               <Route path="/" element={<Navigate to="/desk-booking" />} />
               <Route path="*" element={<Navigate to="/404" />} />
