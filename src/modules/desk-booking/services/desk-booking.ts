@@ -1,0 +1,61 @@
+import { gql } from '@apollo/client';
+
+export const GET_RESERVATIONS = gql`
+  query GetReservations($filter: String!, $sort: String, $pageNo: Int, $pageSize: Int) {
+    getReservations(input: { filter: $filter, sort: $sort, pageNo: $pageNo, pageSize: $pageSize }) {
+      totalCount
+      totalPages
+      hasNextPage
+      hasPreviousPage
+      items {
+        ItemId
+        CreatedDate
+        CreatedBy
+        LastUpdatedDate
+        LastUpdatedBy
+        IsDeleted
+        Language
+        OrganizationIds
+        Tags
+        DeletedDate
+        Unit
+        Table
+        chair
+        tableId
+        endTime
+        userId
+        Name
+        startTime
+      }
+    }
+  }
+`;
+
+export const INSERT_RESERVATION = gql`
+  mutation InsertReservation($input: ReservationInsertInput!) {
+    insertReservation(input: $input) {
+      acknowledged
+      totalImpactedData
+      itemId
+    }
+  }
+`;
+
+export const DELETE_RESERVATION = gql`
+  mutation DeleteReservation($filter: String!) {
+    deleteReservation(filter: $filter) {
+      acknowledged
+      totalImpactedData
+      itemId
+    }
+  }
+`;
+export const UPDATE_RESERVATION = gql`
+  mutation UpdateReservation($filter: String!, $input: ReservationUpdateInput!) {
+    updateReservation(filter: $filter, input: $input) {
+      acknowledged
+      totalImpactedData
+      itemId
+    }
+  }
+`;

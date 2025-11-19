@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 import { Sidebar, SidebarContent, SidebarHeader, useSidebar } from '@/components/ui-kit/sidebar';
 import { useTheme } from '@/styles/theme/theme-provider';
 import { getSidebarStyle } from '@/utils/sidebar-utils';
-import { useFilteredMenu } from '@/hooks/use-filtered-menu';
-import { LogoSection, MenuSection } from '@/components/core';
-import { menuItems } from '@/constant/sidebar-menu';
+// import { useFilteredMenu } from '@/hooks/use-filtered-menu';
+import { LogoSection } from '@/components/core';
+// import { menuItems } from '@/constant/sidebar-menu';
 
 /**
  * AppSidebar Component
@@ -47,13 +47,13 @@ import { menuItems } from '@/constant/sidebar-menu';
 export const AppSidebar = () => {
   const { theme } = useTheme();
   const { pathname } = useLocation();
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const { setOpenMobile, open, isMobile, openMobile } = useSidebar();
 
-  const filteredMenuItems = useFilteredMenu(menuItems);
+  // const filteredMenuItems = useFilteredMenu(menuItems);
 
-  const integratedMenuItems = filteredMenuItems.filter((item) => item.isIntegrated === true);
-  const designOnlyMenuItems = filteredMenuItems.filter((item) => item.isIntegrated !== true);
+  // const integratedMenuItems = filteredMenuItems.filter((item) => item.isIntegrated === true);
+  // const designOnlyMenuItems = filteredMenuItems.filter((item) => item.isIntegrated !== true);
 
   useEffect(() => {
     if (!isMobile) {
@@ -83,21 +83,21 @@ export const AppSidebar = () => {
       </SidebarHeader>
 
       <SidebarContent className="text-base ml-4 mr-2 my-3 text-high-emphasis font-normal overflow-x-hidden">
-        <MenuSection
+        {/* <MenuSection
           title={t('CLOUD_INTEGRATED')}
           items={integratedMenuItems}
           showText={open || isMobile}
           pathname={pathname}
           onItemClick={isMobile ? () => setOpenMobile(false) : undefined}
-        />
+        /> */}
 
-        <MenuSection
+        {/* <MenuSection
           title={t('DESIGN_ONLY')}
           items={designOnlyMenuItems}
           showText={open || isMobile}
           pathname={pathname}
           onItemClick={isMobile ? () => setOpenMobile(false) : undefined}
-        />
+        /> */}
       </SidebarContent>
     </Sidebar>
   );
