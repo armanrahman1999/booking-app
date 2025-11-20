@@ -149,7 +149,6 @@ const Chair = ({ reservation, isSelected, onSelect }: ChairProps) => {
   const [occupied, setOccupied] = useState(false);
   const { data: userData } = useGetAccount();
   const name = reservation.name;
-  const startTime = reservation.startTime;
 
   // FIX: Proper occupied logic
   useEffect(() => {
@@ -190,19 +189,33 @@ const Chair = ({ reservation, isSelected, onSelect }: ChairProps) => {
     }
   };
 
-  const formatStartTime = (isoString: string) => {
-    if (!isoString) return '';
-    const date = new Date(isoString);
-    return date.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-      timeZone: 'Asia/Dhaka',
-    });
+  const formatStartTime = (isoString: string | Date) => {
+    if (!isoString) return 'N/A';
+
+    try {
+      const date = typeof isoString === 'string' ? new Date(isoString) : isoString;
+
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+      }
+
+      return date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+        timeZone: 'Asia/Dhaka',
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid Date';
+    }
   };
+
+  const startTime = reservation?.startTime || new Date(0);
 
   const chairButton = (
     <Button
@@ -228,9 +241,7 @@ const Chair = ({ reservation, isSelected, onSelect }: ChairProps) => {
           <TooltipContent>
             <div className="text-sm">
               <p className="font-semibold">{name}</p>
-              <p className="text-xs text-gray-500">
-                Booked: {formatStartTime(startTime.toISOString())}
-              </p>
+              <p className="text-xs text-gray-500">Booked: {formatStartTime(startTime)}</p>
             </div>
           </TooltipContent>
         </Tooltip>

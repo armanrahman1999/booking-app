@@ -3,7 +3,7 @@ import { clients } from '@/lib/https';
 class BookingService {
   async captchaVerification(code: string) {
     const url = `/captcha/v1/Captcha/Verify?VerificationCode
-=${code}&ConfigurationName=reCaptcha-v2-checkbox`;
+=${code}&ConfigurationName=recaptcha`;
     return clients.get<any>(url);
   }
   async getRole() {
