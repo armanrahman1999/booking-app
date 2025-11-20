@@ -32,7 +32,7 @@ export interface Reservation {
   tableId: string;
   endTime: Date;
   userId: string;
-  name: string;
+  Name: string;
   startTime: Date;
   __typename: string;
 }
@@ -148,7 +148,8 @@ const Chair = ({ reservation, isSelected, onSelect }: ChairProps) => {
   const { chair, ItemId, userId } = reservation;
   const [occupied, setOccupied] = useState(false);
   const { data: userData } = useGetAccount();
-  const name = reservation.name;
+  const name = reservation.Name || '';
+  const seat = chair.replace('chair', 'Seat');
 
   // FIX: Proper occupied logic
   useEffect(() => {
@@ -225,7 +226,7 @@ const Chair = ({ reservation, isSelected, onSelect }: ChairProps) => {
       variant="outline"
     >
       <div className="flex flex-col items-center">
-        <span>{chair}</span>
+        <span>{seat}</span>
         {isSelected && <span className="text-xs mt-1">Selected</span>}
         {isBookedByMe && <span className="text-xs mt-1">Your Seat</span>}
       </div>
@@ -237,11 +238,14 @@ const Chair = ({ reservation, isSelected, onSelect }: ChairProps) => {
     return (
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger asChild>{chairButton}</TooltipTrigger>
-          <TooltipContent>
+          <TooltipTrigger asChild>
+            {/* Wrap button in a span to enable pointer events */}
+            <span className="inline-block w-full">{chairButton}</span>
+          </TooltipTrigger>
+          <TooltipContent className="bg-background">
             <div className="text-sm">
-              <p className="font-semibold">{name}</p>
-              <p className="text-xs text-gray-500">Booked: {formatStartTime(startTime)}</p>
+              <p className="font-semibold text-high-emphasis">{name}</p>
+              <p className="text-xs text-low-emphasis">Booked: {formatStartTime(startTime)}</p>
             </div>
           </TooltipContent>
         </Tooltip>
