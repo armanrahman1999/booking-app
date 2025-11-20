@@ -25,7 +25,7 @@ export const BookChairButton = ({
     type: 'reCaptcha-v2-checkbox',
   });
 
-  const { isLoading: captchaLoading } = useCaptchaVerification(code);
+  const { isLoading: captchaLoading, isSuccess } = useCaptchaVerification(code);
   const { cleanupAndUpdate, isUpdating } = useReservationCleanupAndUpdate();
 
   // Track if booking is in progress to prevent duplicate calls
@@ -48,11 +48,11 @@ export const BookChairButton = ({
     }
   };
 
-  // Auto-trigger booking when captcha is completed
+  // Auto-trigger booking when captcha verification is successful
   useEffect(() => {
     const completeCaptcha = async () => {
-      // Prevent duplicate calls
-      if (!code || !showCaptcha || !selectedChair) return;
+      // Only proceed if captcha verification was successful
+      if (!isSuccess || !showCaptcha || !selectedChair) return;
       if (isBookingRef.current) return;
       if (processedCodeRef.current === code) return;
 
@@ -78,7 +78,7 @@ export const BookChairButton = ({
 
     completeCaptcha();
   }, [
-    code,
+    isSuccess, // Changed from 'code' to 'isSuccess'
     showCaptcha,
     selectedChair,
     cleanupAndUpdate,
@@ -86,16 +86,19 @@ export const BookChairButton = ({
     onClearSelection,
     reset,
     name,
+    code,
   ]);
+
+  const isProcessing = captchaLoading || isUpdating || isBookingRef.current;
 
   return (
     <div className="flex flex-col gap-2">
       <Button
         onClick={handleBookChair}
-        disabled={!selectedChair || isUpdating || isBookingRef.current}
+        disabled={!selectedChair || isProcessing}
         className="min-w-[160px]"
       >
-        {isUpdating || isBookingRef.current ? 'Booking...' : 'Book Selected Chair'}
+        {isProcessing ? 'Processing...' : 'Book Selected Chair'}
       </Button>
 
       {showCaptcha && (
@@ -103,6 +106,9 @@ export const BookChairButton = ({
           <p className="text-sm font-medium">Complete the captcha to confirm booking:</p>
           <Captcha {...captcha} />
           {captchaLoading && <span className="text-sm text-blue-600">Verifying captcha...</span>}
+          {isSuccess && !isUpdating && (
+            <span className="text-sm text-green-600">✓ Captcha verified, booking chair...</span>
+          )}
         </div>
       )}
     </div>
