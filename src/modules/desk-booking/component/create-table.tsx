@@ -5,6 +5,7 @@ import API_CONFIG from '@/config/api';
 import { Button } from '@/components/ui-kit/button';
 import { v4 as uuidv4 } from 'uuid';
 import { INSERT_RESERVATION } from '../services/desk-booking';
+import { useGetAccount } from '@/modules/profile/hooks/use-account';
 
 interface CreateTableProps {
   unit: string;
@@ -16,10 +17,13 @@ export const CreateTable = ({ unit, count, onTableCreated }: CreateTableProps) =
   const accessToken = useAuthStore((state) => state.accessToken);
   const BLOCKS_KEY = API_CONFIG.blocksKey;
   const [insertReservation, { loading }] = useMutation(INSERT_RESERVATION);
+  const { data: userData } = useGetAccount();
 
   // State for dynamic rows and columns
   const [rows, setRows] = React.useState(2);
   const [columns, setColumns] = React.useState(4);
+
+  const isAdmin = Array.isArray(userData?.roles) && userData.roles.includes('admin');
 
   const handleCreateTable = async () => {
     try {
@@ -62,6 +66,8 @@ export const CreateTable = ({ unit, count, onTableCreated }: CreateTableProps) =
       console.error('Error creating reservations:', err);
     }
   };
+
+  if (!isAdmin) return null;
 
   return (
     <div className="flex flex-col gap-2 max-w-xs">

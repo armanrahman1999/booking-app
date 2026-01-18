@@ -44,7 +44,12 @@ interface IReservationProps {
   onTableDeleted?: () => void;
 }
 
-export const RoomArea = ({ data, selectedChair, onChairSelect, onTableDeleted }: IReservationProps) => {
+export const RoomArea = ({
+  data,
+  selectedChair,
+  onChairSelect,
+  onTableDeleted,
+}: IReservationProps) => {
   const tables = data.reduce(
     (acc, item) => {
       if (!acc[item.Table]) {
@@ -83,6 +88,7 @@ interface TableProps {
 const Table = ({ tableName, data, selectedChair, onChairSelect, onTableDeleted }: TableProps) => {
   const accessToken = useAuthStore((state) => state.accessToken);
   const BLOCKS_KEY = API_CONFIG.blocksKey;
+  const { data: userData } = useGetAccount();
 
   const [deleteReservation, { loading }] = useMutation(DELETE_RESERVATION);
 
@@ -111,16 +117,20 @@ const Table = ({ tableName, data, selectedChair, onChairSelect, onTableDeleted }
     }
   };
 
+  const isAdmin = Array.isArray(userData?.roles) && userData.roles.includes('admin');
+
   return (
     <div className="border rounded-lg p-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold mb-4">Table: {tableName}</h3>
-        <Trash
-          className={`w-5 h-5 ${
-            loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:text-red-600'
-          }`}
-          onClick={loading ? undefined : handleDelete}
-        />
+        {isAdmin && (
+          <Trash
+            className={`w-5 h-5 ${
+              loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:text-red-600'
+            }`}
+            onClick={loading ? undefined : handleDelete}
+          />
+        )}
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
