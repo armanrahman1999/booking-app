@@ -28,36 +28,31 @@ export const CreateTable = ({ unit, count, onTableCreated }: CreateTableProps) =
       const endTime = new Date(0).toISOString();
       const insertionPromises = [];
 
-      let chairIndex = 1;
-      for (let row = 1; row <= rows; row++) {
-        for (let col = 1; col <= columns; col++) {
-          const chairName = `chair-${chairIndex}`;
-          insertionPromises.push(
-            insertReservation({
-              variables: {
-                input: {
-                  Unit: unit,
-                  Table: tableName,
-                  chair: chairName,
-                  tableId: tableId,
-                  endTime: endTime,
-                  userId: '',
-                  Name: '',
-                  startTime: new Date().toISOString(),
-                  row,
-                  column: col,
-                },
+      const totalChairs = rows * columns;
+      for (let i = 1; i <= totalChairs; i++) {
+        const chairName = `chair-${i}`;
+        insertionPromises.push(
+          insertReservation({
+            variables: {
+              input: {
+                Unit: unit,
+                Table: tableName,
+                chair: chairName,
+                tableId: tableId,
+                endTime: endTime,
+                userId: '',
+                Name: '',
+                startTime: new Date().toISOString(),
               },
-              context: {
-                headers: {
-                  Authorization: `Bearer ${accessToken}`,
-                  'x-blocks-key': BLOCKS_KEY,
-                },
+            },
+            context: {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'x-blocks-key': BLOCKS_KEY,
               },
-            })
-          );
-          chairIndex++;
-        }
+            },
+          })
+        );
       }
 
       const results = await Promise.all(insertionPromises);
