@@ -10,6 +10,7 @@ import { BookChairButton } from '../component/book-chair-button';
 import { getTargetUtcTime } from '../utils/getTime';
 import { useGetAccount } from '@/modules/profile/hooks/use-account';
 import CreateTable from '../component/create-table';
+import { ManageUnitsButton } from '../component/manage-units-button';
 
 export const DeskBookingPage = () => {
   const { data: userData } = useGetAccount();
@@ -53,9 +54,12 @@ export const DeskBookingPage = () => {
 
   return (
     <div className="flex flex-col w-full gap-5">
-      <div className="flex justify-between">
+      <div className="flex justify-between items-center">
         <h1 className="text-lg font-semibold">Desk Booking for {formatted}</h1>
-        <UnitSelector value={unit} onValueChange={setUnit} />
+        <div className="flex items-center">
+          <UnitSelector value={unit} onValueChange={setUnit} />
+          <ManageUnitsButton />
+        </div>
       </div>
       <CreateTable unit={unit} count={count} onTableCreated={refetch} />
       <div className="flex gap-2">
