@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui-kit/button';
-// import { Trash } from 'lucide-react';
-// import { useMutation } from '@apollo/client';
-// import { useAuthStore } from '@/state/store/auth';
-// import API_CONFIG from '@/config/api';
-// import { DELETE_RESERVATION } from '../services/desk-booking';
+import { Trash } from 'lucide-react';
+import { useMutation } from '@apollo/client';
+import { useAuthStore } from '@/state/store/auth';
+import API_CONFIG from '@/config/api';
+import { DELETE_RESERVATION } from '../services/desk-booking';
 import { useGetAccount } from '@/modules/profile/hooks/use-account';
 import {
   Tooltip,
@@ -78,50 +78,50 @@ interface TableProps {
 }
 
 const Table = ({ tableName, data, selectedChair, onChairSelect }: TableProps) => {
-  // const accessToken = useAuthStore((state) => state.accessToken);
-  // const BLOCKS_KEY = API_CONFIG.blocksKey;
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const BLOCKS_KEY = API_CONFIG.blocksKey;
 
-  // const [deleteReservation, { loading }] = useMutation(DELETE_RESERVATION);
+  const [deleteReservation, { loading }] = useMutation(DELETE_RESERVATION);
 
-  // const handleDelete = async () => {
-  //   if (data.length === 0) return;
+  const handleDelete = async () => {
+    if (data.length === 0) return;
 
-  //   try {
-  //     // Create delete promises for each item using their unique properties
-  //     const deletePromises = data.map((item) => {
-  //       const filter = JSON.stringify({
-  //         _id: item.ItemId,
-  //       });
+    try {
+      // Create delete promises for each item using their unique properties
+      const deletePromises = data.map((item) => {
+        const filter = JSON.stringify({
+          _id: item.ItemId,
+        });
 
-  //       return deleteReservation({
-  //         variables: { filter },
-  //         context: {
-  //           headers: {
-  //             Authorization: `Bearer ${accessToken}`,
-  //             'x-blocks-key': BLOCKS_KEY,
-  //           },
-  //         },
-  //       });
-  //     });
+        return deleteReservation({
+          variables: { filter },
+          context: {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'x-blocks-key': BLOCKS_KEY,
+            },
+          },
+        });
+      });
 
-  //     // Execute all deletions in parallel
-  //     const results = await Promise.all(deletePromises);
-  //     if (!results) console.error('Error deleting reservations');
-  //   } catch (error) {
-  //     console.error('Error deleting reservations:', error);
-  //   }
-  // };
+      // Execute all deletions in parallel
+      const results = await Promise.all(deletePromises);
+      if (!results) console.error('Error deleting reservations');
+    } catch (error) {
+      console.error('Error deleting reservations:', error);
+    }
+  };
 
   return (
     <div className="border rounded-lg p-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold mb-4">Table: {tableName}</h3>
-        {/* <Trash
+        <Trash
           className={`w-5 h-5 ${
             loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:text-red-600'
           }`}
           onClick={loading ? undefined : handleDelete}
-        /> */}
+        />
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
