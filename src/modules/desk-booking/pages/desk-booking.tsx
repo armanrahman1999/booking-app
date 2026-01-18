@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { BookChairButton } from '../component/book-chair-button';
 import { getTargetUtcTime } from '../utils/getTime';
 import { useGetAccount } from '@/modules/profile/hooks/use-account';
+import CreateTable from '../component/create-table';
 
 export const DeskBookingPage = () => {
   const { data: userData } = useGetAccount();
@@ -48,7 +49,7 @@ export const DeskBookingPage = () => {
     refetch();
   }, [unit, refetch]);
 
-  // const count = (data?.getReservations?.totalCount || 0) / 8 + 1;
+  const count = Math.floor((data?.getReservations?.totalCount || 0) / 8) + 1;
 
   return (
     <div className="flex flex-col w-full gap-5">
@@ -56,7 +57,7 @@ export const DeskBookingPage = () => {
         <h1 className="text-lg font-semibold">Desk Booking for {formatted}</h1>
         <UnitSelector value={unit} onValueChange={setUnit} />
       </div>
-
+      <CreateTable unit={unit} count={count} onTableCreated={refetch} />
       <div className="flex gap-2">
         {/* <CreateTable unit={unit} count={count} onTableCreated={refetch} /> */}
         <BookChairButton
@@ -71,6 +72,7 @@ export const DeskBookingPage = () => {
           data={data?.getReservations?.items || []}
           selectedChair={selectedChair}
           onChairSelect={setSelectedChair}
+          onTableDeleted={refetch}
         />
       </div>
     </div>
