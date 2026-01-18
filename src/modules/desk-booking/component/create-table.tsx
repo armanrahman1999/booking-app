@@ -1,3 +1,4 @@
+import React from 'react';
 import { useMutation } from '@apollo/client';
 import { useAuthStore } from '@/state/store/auth';
 import API_CONFIG from '@/config/api';
@@ -14,54 +15,53 @@ interface CreateTableProps {
 export const CreateTable = ({ unit, count, onTableCreated }: CreateTableProps) => {
   const accessToken = useAuthStore((state) => state.accessToken);
   const BLOCKS_KEY = API_CONFIG.blocksKey;
-
   const [insertReservation, { loading }] = useMutation(INSERT_RESERVATION);
 
-  const handleCreateRow = async () => {
+  // State for dynamic rows and columns
+  const [rows, setRows] = React.useState(2);
+  const [columns, setColumns] = React.useState(4);
+
+  const handleCreateTable = async () => {
     try {
       const tableName = `table-${count}`;
-      const chairsCount = 8;
-
-      // Generate tableId once
       const tableId = uuidv4();
-
-      // Fixed endTime for all entries
-      const endTime = new Date(0).toISOString(); // "1970-01-01T00:00:00.000Z"
-
+      const endTime = new Date(0).toISOString();
       const insertionPromises = [];
 
-      for (let i = 1; i <= chairsCount; i++) {
-        const chairName = `chair-${i}`;
-
-        insertionPromises.push(
-          insertReservation({
-            variables: {
-              input: {
-                Unit: unit,
-                Table: tableName,
-                chair: chairName,
-                tableId: tableId,
-                endTime: endTime,
-                userId: '',
-                Name: '',
-                startTime: new Date().toISOString(),
+      let chairIndex = 1;
+      for (let row = 1; row <= rows; row++) {
+        for (let col = 1; col <= columns; col++) {
+          const chairName = `chair-${chairIndex}`;
+          insertionPromises.push(
+            insertReservation({
+              variables: {
+                input: {
+                  Unit: unit,
+                  Table: tableName,
+                  chair: chairName,
+                  tableId: tableId,
+                  endTime: endTime,
+                  userId: '',
+                  Name: '',
+                  startTime: new Date().toISOString(),
+                  row,
+                  column: col,
+                },
               },
-            },
-            context: {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-                'x-blocks-key': BLOCKS_KEY,
+              context: {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                  'x-blocks-key': BLOCKS_KEY,
+                },
               },
-            },
-          })
-        );
+            })
+          );
+          chairIndex++;
+        }
       }
 
       const results = await Promise.all(insertionPromises);
-
       if (!results) console.error('Error creating reservations');
-
-      // Call the refetch function after successful creation
       onTableCreated();
     } catch (err) {
       console.error('Error creating reservations:', err);
@@ -69,9 +69,33 @@ export const CreateTable = ({ unit, count, onTableCreated }: CreateTableProps) =
   };
 
   return (
-    <Button onClick={handleCreateRow} disabled={loading}>
-      {loading ? 'Creating Table...' : 'Create Table with 8 Chairs'}
-    </Button>
+    <div className="flex flex-col gap-2 max-w-xs">
+      <div className="flex gap-2">
+        <label className="flex flex-col text-xs font-medium">
+          Rows
+          <input
+            type="number"
+            min={1}
+            value={rows}
+            onChange={(e) => setRows(Number(e.target.value))}
+            className="border rounded px-2 py-1"
+          />
+        </label>
+        <label className="flex flex-col text-xs font-medium">
+          Columns
+          <input
+            type="number"
+            min={1}
+            value={columns}
+            onChange={(e) => setColumns(Number(e.target.value))}
+            className="border rounded px-2 py-1"
+          />
+        </label>
+      </div>
+      <Button onClick={handleCreateTable} disabled={loading}>
+        {loading ? 'Creating Table...' : `Create Table (${rows} x ${columns})`}
+      </Button>
+    </div>
   );
 };
 
