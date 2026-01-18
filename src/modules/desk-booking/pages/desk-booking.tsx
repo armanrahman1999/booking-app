@@ -49,7 +49,7 @@ export const DeskBookingPage = () => {
     refetch();
   }, [unit, refetch]);
 
-  const count = (data?.getReservations?.totalCount || 0) / 8 + 1;
+  const count = Math.floor((data?.getReservations?.totalCount || 0) / 8) + 1;
 
   return (
     <div className="flex flex-col w-full gap-5">
@@ -72,6 +72,7 @@ export const DeskBookingPage = () => {
           data={data?.getReservations?.items || []}
           selectedChair={selectedChair}
           onChairSelect={setSelectedChair}
+          onTableDeleted={refetch}
         />
       </div>
     </div>

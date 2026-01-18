@@ -41,9 +41,10 @@ interface IReservationProps {
   data: Reservation[];
   selectedChair: string | null;
   onChairSelect: (chairId: string | null) => void;
+  onTableDeleted?: () => void;
 }
 
-export const RoomArea = ({ data, selectedChair, onChairSelect }: IReservationProps) => {
+export const RoomArea = ({ data, selectedChair, onChairSelect, onTableDeleted }: IReservationProps) => {
   const tables = data.reduce(
     (acc, item) => {
       if (!acc[item.Table]) {
@@ -64,6 +65,7 @@ export const RoomArea = ({ data, selectedChair, onChairSelect }: IReservationPro
           data={tableData}
           selectedChair={selectedChair}
           onChairSelect={onChairSelect}
+          onTableDeleted={onTableDeleted}
         />
       ))}
     </div>
@@ -75,9 +77,10 @@ interface TableProps {
   data: Reservation[];
   selectedChair: string | null;
   onChairSelect: (chairId: string | null) => void;
+  onTableDeleted?: () => void;
 }
 
-const Table = ({ tableName, data, selectedChair, onChairSelect }: TableProps) => {
+const Table = ({ tableName, data, selectedChair, onChairSelect, onTableDeleted }: TableProps) => {
   const accessToken = useAuthStore((state) => state.accessToken);
   const BLOCKS_KEY = API_CONFIG.blocksKey;
 
@@ -85,14 +88,10 @@ const Table = ({ tableName, data, selectedChair, onChairSelect }: TableProps) =>
 
   const handleDelete = async () => {
     if (data.length === 0) return;
-
     try {
       // Create delete promises for each item using their unique properties
       const deletePromises = data.map((item) => {
-        const filter = JSON.stringify({
-          _id: item.ItemId,
-        });
-
+        const filter = JSON.stringify({ _id: item.ItemId });
         return deleteReservation({
           variables: { filter },
           context: {
@@ -103,10 +102,10 @@ const Table = ({ tableName, data, selectedChair, onChairSelect }: TableProps) =>
           },
         });
       });
-
       // Execute all deletions in parallel
       const results = await Promise.all(deletePromises);
       if (!results) console.error('Error deleting reservations');
+      if (onTableDeleted) onTableDeleted();
     } catch (error) {
       console.error('Error deleting reservations:', error);
     }
