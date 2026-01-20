@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useMutation, useQuery } from '@apollo/client';
+import { useMutation, useQuery, useApolloClient } from '@apollo/client';
 import { useAuthStore } from '@/state/store/auth';
 import API_CONFIG from '@/config/api';
 import { Button } from '@/components/ui-kit/button';
@@ -19,9 +19,16 @@ export const ManageUnitsButton = () => {
   const [name, setName] = useState('');
   const accessToken = useAuthStore((state) => state.accessToken);
   const BLOCKS_KEY = API_CONFIG.blocksKey;
+  const client = useApolloClient();
+
   const { data, loading: loadingUnits } = useQuery(GET_UNITS, {
-    variables: { filter: '{}', sort: '{}', pageNo: 1, pageSize: 100 },
-    // fetchPolicy: 'cache-and-network',
+    variables: {
+      filter: '{}',
+      sort: '{}',
+      pageNo: 1,
+      pageSize: 100,
+    },
+    fetchPolicy: 'cache-and-network',
     context: {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -29,36 +36,56 @@ export const ManageUnitsButton = () => {
       },
     },
   });
+
   const [insertUnit, { loading: adding }] = useMutation(INSERT_UNIT, {
-    refetchQueries: [{ query: GET_UNITS }],
     context: {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'x-blocks-key': BLOCKS_KEY,
       },
     },
+    onCompleted: () => {
+      refetchUnits();
+    },
   });
+
   const [deleteUnit, { loading: deleting }] = useMutation(DELETE_UNIT, {
-    refetchQueries: [{ query: GET_UNITS }],
     context: {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'x-blocks-key': BLOCKS_KEY,
       },
     },
+    onCompleted: () => {
+      refetchUnits();
+    },
   });
+
+  const refetchUnits = async () => {
+    await client.refetchQueries({
+      include: [GET_UNITS],
+    });
+  };
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!value.trim() || !name.trim()) return;
-    const variables = { input: { value: value.trim(), name: name.trim() } };
-    await insertUnit({ variables });
-    setValue('');
-    setName('');
+    try {
+      const variables = { input: { value: value.trim(), name: name.trim() } };
+      await insertUnit({ variables });
+      setValue('');
+      setName('');
+    } catch (err) {
+      console.error('Error adding unit:', err);
+    }
   };
 
   const handleDelete = async (unitValue: string) => {
-    await deleteUnit({ variables: { filter: JSON.stringify({ value: unitValue }) } });
+    try {
+      await deleteUnit({ variables: { filter: JSON.stringify({ value: unitValue }) } });
+    } catch (err) {
+      console.error('Error deleting unit:', err);
+    }
   };
 
   const units = data?.getUnits?.items || [];
