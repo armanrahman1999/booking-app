@@ -61,6 +61,8 @@ export const GET_RESERVATIONS = gql`
         userId
         Name
         startTime
+        row
+        column
       }
     }
   }

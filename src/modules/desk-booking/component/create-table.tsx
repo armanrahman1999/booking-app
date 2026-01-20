@@ -35,6 +35,10 @@ export const CreateTable = ({ unit, count, onTableCreated }: CreateTableProps) =
       const totalChairs = rows * columns;
       for (let i = 1; i <= totalChairs; i++) {
         const chairName = `chair-${i}`;
+        // Calculate row and column positions dynamically
+        const rowPosition = Math.floor((i - 1) / columns) + 1;
+        const columnPosition = ((i - 1) % columns) + 1;
+
         insertionPromises.push(
           insertReservation({
             variables: {
@@ -47,6 +51,8 @@ export const CreateTable = ({ unit, count, onTableCreated }: CreateTableProps) =
                 userId: '',
                 Name: '',
                 startTime: new Date().toISOString(),
+                row: rowPosition,
+                column: columnPosition,
               },
             },
             context: {
