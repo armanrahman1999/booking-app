@@ -22,6 +22,7 @@ export const CreateTable = ({ unit, count, onTableCreated }: CreateTableProps) =
   // State for dynamic rows and columns
   const [rows, setRows] = React.useState(2);
   const [columns, setColumns] = React.useState(4);
+  const [tableLocationName, setTableLocationName] = React.useState('');
 
   const isAdmin = Array.isArray(userData?.roles) && userData.roles.includes('admin');
 
@@ -31,10 +32,15 @@ export const CreateTable = ({ unit, count, onTableCreated }: CreateTableProps) =
       const tableId = uuidv4();
       const endTime = new Date(0).toISOString();
       const insertionPromises = [];
+      const finalTableLocationName = tableLocationName.trim() || tableName;
 
       const totalChairs = rows * columns;
       for (let i = 1; i <= totalChairs; i++) {
         const chairName = `chair-${i}`;
+        // Calculate row and column positions dynamically
+        const rowPosition = Math.floor((i - 1) / columns) + 1;
+        const columnPosition = ((i - 1) % columns) + 1;
+
         insertionPromises.push(
           insertReservation({
             variables: {
@@ -47,6 +53,9 @@ export const CreateTable = ({ unit, count, onTableCreated }: CreateTableProps) =
                 userId: '',
                 Name: '',
                 startTime: new Date().toISOString(),
+                row: rowPosition,
+                column: columnPosition,
+                tableName: finalTableLocationName,
               },
             },
             context: {
@@ -61,6 +70,7 @@ export const CreateTable = ({ unit, count, onTableCreated }: CreateTableProps) =
 
       const results = await Promise.all(insertionPromises);
       if (!results) console.error('Error creating reservations');
+      setTableLocationName('');
       onTableCreated();
     } catch (err) {
       console.error('Error creating reservations:', err);
@@ -72,6 +82,16 @@ export const CreateTable = ({ unit, count, onTableCreated }: CreateTableProps) =
   return (
     <div className="flex flex-col gap-2 max-w-xs">
       <div className="flex gap-2">
+        <label className="flex flex-col text-xs font-medium">
+          Name
+          <input
+            type="text"
+            value={tableLocationName}
+            onChange={(e) => setTableLocationName(e.target.value)}
+            placeholder="Table location name"
+            className="border rounded px-2 py-1"
+          />
+        </label>
         <label className="flex flex-col text-xs font-medium">
           Rows
           <input

@@ -7,13 +7,10 @@ import {
   SelectValue,
 } from '@/components/ui-kit/select';
 
-const Units = [
-  { value: 'blocks', name: 'Blocks' },
-  { value: 'retail', name: 'Retail' },
-  { value: 'genesis', name: 'Genesis X' },
-  { value: 'inb', name: 'INB' },
-  { value: 'consulting', name: 'Consulting' },
-];
+import { useQuery } from '@apollo/client';
+import { GET_UNITS } from '../services/desk-booking';
+import { useAuthStore } from '@/state/store/auth';
+import API_CONFIG from '@/config/api';
 
 interface UnitSelectorProps {
   value: string;
@@ -21,14 +18,35 @@ interface UnitSelectorProps {
 }
 
 export const UnitSelector = ({ value, onValueChange }: UnitSelectorProps) => {
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const BLOCKS_KEY = API_CONFIG.blocksKey;
+
+  const { data, loading } = useQuery(GET_UNITS, {
+    variables: {
+      filter: '{}',
+      sort: '{}',
+      pageNo: 1,
+      pageSize: 100,
+    },
+    fetchPolicy: 'cache-and-network',
+    context: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'x-blocks-key': BLOCKS_KEY,
+      },
+    },
+  });
+
+  const units = data?.getUnits?.items || [];
+
   return (
-    <Select value={value} onValueChange={onValueChange}>
+    <Select value={value} onValueChange={onValueChange} disabled={loading}>
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder="Select unit" />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
-          {Units.map((unit) => (
+          {units.map((unit: { value: string; name: string; ItemId: string }) => (
             <SelectItem key={unit.value} value={unit.value}>
               {unit.name}
             </SelectItem>
