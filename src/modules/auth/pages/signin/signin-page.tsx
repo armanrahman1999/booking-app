@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import darklogo from '@/assets/images/construct_logo_dark.svg';
@@ -8,6 +8,7 @@ import { Signin } from '../../components/signin/signin';
 import { useAuthStore } from '@/state/store/auth';
 import { useGetLoginOptions, useSigninMutation } from '../../hooks/use-auth';
 import { SignInResponse } from '../../services/auth.service';
+import { LoadingOverlay } from '@/components/core';
 
 export const SigninPage = () => {
   const { theme } = useTheme();
@@ -18,12 +19,14 @@ export const SigninPage = () => {
   const { mutateAsync: signinMutate } = useSigninMutation<'social'>();
   const { login, setTokens } = useAuthStore();
   const isExchangingRef = useRef(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     const code = searchParams.get('code');
     const state = searchParams.get('state');
     if (code && state && !isExchangingRef.current) {
       isExchangingRef.current = true;
+      setIsProcessing(true);
       (async () => {
         try {
           const res = (await signinMutate({ grantType: 'social', code, state })) as SignInResponse;
@@ -39,12 +42,17 @@ export const SigninPage = () => {
         } catch (error) {
           // eslint-disable-next-line no-console
           console.error('SSO code exchange failed:', error);
+          setIsProcessing(false);
         } finally {
           isExchangingRef.current = false;
         }
       })();
     }
   }, [searchParams, signinMutate, login, setTokens, navigate]);
+
+  if (isProcessing) {
+    return <LoadingOverlay />;
+  }
 
   return (
     <div className="flex flex-col gap-6">
