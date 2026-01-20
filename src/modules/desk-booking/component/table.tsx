@@ -37,6 +37,7 @@ export interface Reservation {
   __typename: string;
   row: number;
   column: number;
+  tableName: string;
 }
 
 interface IReservationProps {
@@ -121,6 +122,9 @@ const Table = ({ tableName, data, selectedChair, onChairSelect, onTableDeleted }
 
   const isAdmin = Array.isArray(userData?.roles) && userData.roles.includes('admin');
 
+  // Use tableName from data if available, otherwise use the prop
+  const displayTableName = data[0]?.tableName || tableName;
+
   // Get max row and column to create grid
   const maxRow = Math.max(...data.map((item) => item.row || 1), 1);
   const maxColumn = Math.max(...data.map((item) => item.column || 1), 1);
@@ -145,7 +149,7 @@ const Table = ({ tableName, data, selectedChair, onChairSelect, onTableDeleted }
   return (
     <div className="border rounded-lg p-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold mb-4">Table: {tableName}</h3>
+        <h3 className="text-lg font-semibold mb-4">Table: {displayTableName}</h3>
         {isAdmin && (
           <Trash
             className={`w-5 h-5 ${

@@ -63,6 +63,7 @@ export const GET_RESERVATIONS = gql`
         startTime
         row
         column
+        tableName
       }
     }
   }

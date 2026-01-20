@@ -58,7 +58,9 @@ export const DeskBookingPage = () => {
         <h1 className="text-lg font-semibold">Desk Booking for {formatted}</h1>
         <div className="flex items-center">
           <UnitSelector value={unit} onValueChange={setUnit} />
-          <ManageUnitsButton />
+          {Array.isArray(userData?.roles) && userData.roles.includes('admin') && (
+            <ManageUnitsButton />
+          )}
         </div>
       </div>
       <CreateTable unit={unit} count={count} onTableCreated={refetch} />
