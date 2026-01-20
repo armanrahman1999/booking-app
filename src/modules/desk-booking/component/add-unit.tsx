@@ -3,12 +3,23 @@ import { useMutation } from '@apollo/client';
 import { Button } from '@/components/ui-kit/button';
 import { Input } from '@/components/ui-kit/input';
 import { INSERT_UNIT, GET_UNITS } from '../services/desk-booking';
+import { useAuthStore } from '@/state/store/auth';
+import API_CONFIG from '@/config/api';
 
 export const AddUnit = () => {
   const [value, setValue] = React.useState('');
   const [name, setName] = React.useState('');
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const BLOCKS_KEY = API_CONFIG.blocksKey;
+
   const [insertUnit, { loading }] = useMutation(INSERT_UNIT, {
     refetchQueries: [{ query: GET_UNITS }],
+    context: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'x-blocks-key': BLOCKS_KEY,
+      },
+    },
   });
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -35,6 +35,8 @@ export interface Reservation {
   Name: string;
   startTime: Date;
   __typename: string;
+  row: number;
+  column: number;
 }
 
 interface IReservationProps {
@@ -119,6 +121,27 @@ const Table = ({ tableName, data, selectedChair, onChairSelect, onTableDeleted }
 
   const isAdmin = Array.isArray(userData?.roles) && userData.roles.includes('admin');
 
+  // Get max row and column to create grid
+  const maxRow = Math.max(...data.map((item) => item.row || 1), 1);
+  const maxColumn = Math.max(...data.map((item) => item.column || 1), 1);
+
+  // Create a map of chairs by row and column for easy lookup
+  const chairMap = new Map<string, Reservation>();
+  data.forEach((item) => {
+    const key = `${item.row}-${item.column}`;
+    chairMap.set(key, item);
+  });
+
+  // Create grid rows
+  const gridRows = Array.from({ length: maxRow }, (_, rowIdx) => {
+    const row = rowIdx + 1;
+    return Array.from({ length: maxColumn }, (_, colIdx) => {
+      const col = colIdx + 1;
+      const key = `${row}-${col}`;
+      return chairMap.get(key) || null;
+    });
+  });
+
   return (
     <div className="border rounded-lg p-4">
       <div className="flex justify-between items-center">
@@ -133,14 +156,23 @@ const Table = ({ tableName, data, selectedChair, onChairSelect, onTableDeleted }
         )}
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        {data.map((item) => (
-          <Chair
-            key={item.ItemId}
-            reservation={item}
-            isSelected={selectedChair === item.ItemId}
-            onSelect={onChairSelect}
-          />
+      <div className="space-y-2">
+        {gridRows.map((row, rowIdx) => (
+          <div key={rowIdx} className="flex gap-2">
+            {row.map((item, colIdx) => (
+              <div key={`${rowIdx}-${colIdx}`} className="flex-1 min-w-24">
+                {item ? (
+                  <Chair
+                    reservation={item}
+                    isSelected={selectedChair === item.ItemId}
+                    onSelect={onChairSelect}
+                  />
+                ) : (
+                  <div className="h-20 bg-gray-100 rounded border border-dashed border-gray-300" />
+                )}
+              </div>
+            ))}
+          </div>
         ))}
       </div>
     </div>

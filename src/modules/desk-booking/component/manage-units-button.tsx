@@ -21,7 +21,7 @@ export const ManageUnitsButton = () => {
   const BLOCKS_KEY = API_CONFIG.blocksKey;
   const { data, loading: loadingUnits } = useQuery(GET_UNITS, {
     variables: { filter: '{}', sort: '{}', pageNo: 1, pageSize: 100 },
-    fetchPolicy: 'cache-and-network',
+    // fetchPolicy: 'cache-and-network',
     context: {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -52,7 +52,6 @@ export const ManageUnitsButton = () => {
     e.preventDefault();
     if (!value.trim() || !name.trim()) return;
     const variables = { input: { value: value.trim(), name: name.trim() } };
-    console.log('InsertUnit variables:', variables);
     await insertUnit({ variables });
     setValue('');
     setName('');

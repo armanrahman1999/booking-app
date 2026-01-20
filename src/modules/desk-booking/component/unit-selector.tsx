@@ -9,6 +9,8 @@ import {
 
 import { useQuery } from '@apollo/client';
 import { GET_UNITS } from '../services/desk-booking';
+import { useAuthStore } from '@/state/store/auth';
+import API_CONFIG from '@/config/api';
 
 interface UnitSelectorProps {
   value: string;
@@ -16,6 +18,9 @@ interface UnitSelectorProps {
 }
 
 export const UnitSelector = ({ value, onValueChange }: UnitSelectorProps) => {
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const BLOCKS_KEY = API_CONFIG.blocksKey;
+
   const { data, loading } = useQuery(GET_UNITS, {
     variables: {
       filter: '{}',
@@ -24,6 +29,12 @@ export const UnitSelector = ({ value, onValueChange }: UnitSelectorProps) => {
       pageSize: 100,
     },
     fetchPolicy: 'cache-and-network',
+    context: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'x-blocks-key': BLOCKS_KEY,
+      },
+    },
   });
 
   const units = data?.getUnits?.items || [];
