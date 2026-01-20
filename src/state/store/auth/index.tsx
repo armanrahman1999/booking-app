@@ -31,6 +31,13 @@ export const useAuthStore = create<AuthState>()(
         set({
           tokens,
         }),
+      tokenExpired: () =>
+        set({
+          isAuthenticated: false,
+          accessToken: null,
+          refreshToken: null,
+          tokens: null,
+        }),
     }),
     {
       name: 'auth-storage',

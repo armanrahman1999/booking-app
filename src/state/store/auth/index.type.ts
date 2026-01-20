@@ -10,4 +10,5 @@ export type AuthState = {
   setAccessToken: (accessToken: string) => void;
   logout: () => void;
   setTokens: (tokens: { accessToken: string; refreshToken: string }) => void;
+  tokenExpired: () => void;
 };
