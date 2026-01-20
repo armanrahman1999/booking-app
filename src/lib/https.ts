@@ -171,12 +171,14 @@ export const clients: Https = {
     const authStore = useAuthStore.getState();
 
     if (!authStore.refreshToken) {
+      authStore.tokenExpired();
       throw new HttpError(401, { error: 'invalid_request' });
     }
 
     const refreshTokenRes = await getRefreshToken();
 
     if (refreshTokenRes.error === 'invalid_request') {
+      authStore.tokenExpired();
       throw new HttpError(401, refreshTokenRes);
     }
 
